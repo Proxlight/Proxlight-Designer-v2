@@ -1,7 +1,7 @@
 <p align="center">
 
   <h1 align="center" style="margin: 0 auto 0 auto;">Proxlight Designer</h1>
-  <h5 align="center" style="margin: 0 auto 0 auto;">Create Something Beautiful</h5>
+  <h5 align="center" style="margin: 0 auto 0 auto;">Create Something Beautiful!</h5>
   </p>
 
 
