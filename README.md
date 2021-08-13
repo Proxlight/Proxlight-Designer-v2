@@ -1,7 +1,7 @@
 <p align="center">
 
   <h1 align="center" style="margin: 0 auto 0 auto;">Proxlight Designer</h1>
-  <h5 align="center" style="margin: 0 auto 0 auto;">Automate Tkinter GUI Creation</h5>
+  <h5 align="center" style="margin: 0 auto 0 auto;">Create Something Beautiful</h5>
   </p>
 
 
@@ -10,7 +10,7 @@
 
 ## 💡 Introduction
 
-Proxlight Designer was created to speed up the GUI-development process in Python. It uses the well-known design software [Figma](https://www.figma.com/) to make creating beautiful Tkinter GUIs in Python a piece of cake.
+Proxlight Designer was created to speed up the GUI-development process in Python. It uses the well-known design software [Figma](https://www.figma.com/) to make creating beautiful Tkinter GUIs in Python.
 
 Proxlight Designer uses the Figma API to analyse a design file and create the respective code and files needed for the GUI. Even Proxlight Designer's GUI is created using Proxlight Designer.
 
