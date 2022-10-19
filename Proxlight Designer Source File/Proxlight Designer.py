@@ -1,16 +1,17 @@
 ''' Proxlight Designer - Created By Pratyush Mishra (Proxlight)'''
 
 
+import sys
 from tkinter import *
 from tkinter import filedialog, messagebox
-
-
+from turtle import color
 
 
 ############################################################################
 
 import requests
 import os
+
 
 def generate_code(token, link, output_path):
 
@@ -24,14 +25,12 @@ def generate_code(token, link, output_path):
 
         return hex_code
 
-
     def get_coordinates(element):
         # Returns element coordinates as x (int) and y (int)
         x = int(element["absoluteBoundingBox"]["x"])
         y = int(element["absoluteBoundingBox"]["y"])
 
         return x, y
-
 
     def get_dimensions(element):
         # Return element dimensions as width (int) and height (int)
@@ -40,14 +39,12 @@ def generate_code(token, link, output_path):
 
         return width, height
 
-
     def get_text_properties(element):
         # Return element font and fontSize (str)
         font = element["style"]["fontPostScriptName"]
         fontSize = element["style"]["fontSize"]
 
         return font, fontSize
-
 
     global fig_window, response
 
@@ -58,7 +55,6 @@ def generate_code(token, link, output_path):
                   'def btn_clicked():',
                   '    print("Button Clicked")\n\n\n'
                   'window = Tk()'])
-
 
     # Getting File Data
 
@@ -71,7 +67,6 @@ def generate_code(token, link, output_path):
 
         except ValueError:
             return ""
-
 
     token = token.strip()
     file_url = link.strip()
@@ -95,7 +90,6 @@ def generate_code(token, link, output_path):
 
     data = response.json()
 
-
     # Getting Window Properties
 
     try:
@@ -111,7 +105,7 @@ def generate_code(token, link, output_path):
         except PermissionError:
             messagebox.showerror("Permission Error",
                                  "Change directory or directory permissions.")
-            
+
     except KeyError:
         messagebox.showerror(
             "Error",
@@ -131,7 +125,6 @@ def generate_code(token, link, output_path):
         print(e)
         window_bg_hex = "#FFFFFF"
 
-
     # Creating Window
 
     lines.extend([f'\nwindow.geometry("{window_width}x{window_height}")',
@@ -146,9 +139,8 @@ def generate_code(token, link, output_path):
                   '    relief = "ridge")',
                   'canvas.place(x = 0, y = 0)\n'])
 
-
     # Getting Elements inside Window
-    
+
     window_elements = fig_window["children"]
 
     btn_count = 0
@@ -156,7 +148,7 @@ def generate_code(token, link, output_path):
 
     for element in window_elements:
 
-        if element["name"] == "Rectangle"or element["name"] == "rectangle":
+        if element["name"] == "Rectangle" or element["name"] == "rectangle":
             width, height = get_dimensions(element)
             x, y = get_coordinates(element)
             element_color = get_color(element)
@@ -234,7 +226,7 @@ def generate_code(token, link, output_path):
             with open(
                     f"{generated_dir}img_textBox{text_entry_count}.png",
                     "wb"
-                    ) as file:
+            ) as file:
                 file.write(image_link.content)
 
             lines.extend([f'entry{text_entry_count}_img = PhotoImage('
@@ -293,7 +285,6 @@ def generate_code(token, link, output_path):
                           f'    {x}, {y},',
                           f'    image=background_img)\n'])
 
-
     # Adding Generated Code to window.py
 
     lines.extend(['window.resizable(False, False)', 'window.mainloop()'])
@@ -305,15 +296,33 @@ def generate_code(token, link, output_path):
     messagebox.showinfo("Success", "Design Exported successfully!")
 
 
-
-
-
 ############################################################################
-
 # Required in order to add data files to Windows executable
-import sys, os
 path = getattr(sys, '_MEIPASS', os.getcwd())
 os.chdir(path)
+
+initialTheme = "light"
+theme = "light"
+
+
+def theme_change():
+    global theme, initialTheme
+    if theme == initialTheme:
+        theme = "dark"
+        b1.config(image=moon,bg=dark_theme_color,activebackground=dark_theme_color)
+        b0.config(image=create_button_dark,bg=dark_theme_color, activebackground=dark_theme_color)
+        background = canvas.create_image(
+            474.5, 286.0,
+            image=background_img_dark)
+
+    else:
+        theme = "light"
+        b1.config(image=sun,bg=light_theme_color,activebackground=light_theme_color)
+        b0.config(image=create_button_light, bg=light_theme_color,
+                  activebackground=light_theme_color)
+        background = canvas.create_image(
+            474.5, 286.0,
+            image=background_img_light)
 
 
 def btn_clicked():
@@ -333,7 +342,8 @@ def btn_clicked():
                              message="Enter a valid output path")
 
     else:
-        generate_code(token,URL, output_path)
+        generate_code(token, URL, output_path)
+
 
 def select_path(event):
     global output_path
@@ -347,7 +357,7 @@ def select_path(event):
 
 def make_label(master, x, y, h, w, *args, **kwargs):
     f = Frame(master, height=h, width=w)
-    f.pack_propagate(0) # don't shrink
+    f.pack_propagate(0)  # don't shrink
     f.place(x=x, y=y)
 
     label = Label(f, *args, **kwargs)
@@ -360,103 +370,111 @@ def make_label(master, x, y, h, w, *args, **kwargs):
 
 window = Tk()
 window.title("Proxlight Designer")
-window.iconbitmap("Icon.ico")
-window.geometry("1000x600")
-window.configure(bg = "#FFFFFF")
+window.iconbitmap("logo.ico")
+window.geometry("975x585")
+window.configure(bg="#FFFFFF")
 canvas = Canvas(
     window,
-    bg = "#FFFFFF",
-    height = 600,
-    width = 1000,
-    bd = 0,
-    highlightthickness = 0,
-    relief = "ridge")
-canvas.place(x = 0, y = 0)
+    bg="#FFFFFF",
+    height=600,
+    width=1000,
+    bd=0,
+    highlightthickness=0,
+    relief="ridge")
+canvas.place(x=0, y=0)
 
-background_img = PhotoImage(file = f"background.png")
+
+background_img_light = PhotoImage(file=f"background_light.png")
+background_img_dark = PhotoImage(file=f"background_dark.png")
+token_entry_img = PhotoImage(file=f"img_textBox0.png")
+URL_entry_img = PhotoImage(file=f"img_textBox1.png")
+path_entry_img = PhotoImage(file=f"img_textBox2.png")
+create_button_light = PhotoImage(file=f"create_button_light.png")
+create_button_dark = PhotoImage(file=f"create_button_dark.png")
+sun = PhotoImage(file=f"sun.png")
+moon = PhotoImage(file=f"moon.png")
+light_theme_color = "#167A80"
+dark_theme_color = "#343636"
+
 background = canvas.create_image(
     474.5, 286.0,
-    image=background_img)
+    image=background_img_light)
 
-canvas.create_text(
-    635.0, 100,
-    text = "Enter Details Here",
-    fill = "#ffffff",
-    font = ("Roboto-Light", int(14.0)))
 
-canvas.create_text(
-    98, 563,
-    text = "Made with    by Proxlight",
-    fill = "#949494",
-    font = ("Roboto-Thin", int(12.0)))
-
-token_entry_img = PhotoImage(file = f"img_textBox0.png")
 token_entry_bg = canvas.create_image(
     703.5, 187.5,
-    image = token_entry_img)
+    image=token_entry_img)
 
 token_entry = Entry(
-    bd = 0,
-    bg = "#ffffff",
-    highlightthickness = 0)
+    bd=0,
+    bg="#ffffff",
+    highlightthickness=0)
 
 token_entry.place(
-    x = 569.5, y = 162,
-    width = 268.0,
-    height = 49)
+    x=592, y=174,
+    width=210.0,
+    height=30)
 
 
-
-
-URL_entry_img = PhotoImage(file = f"img_textBox1.png")
 URL_entry_bg = canvas.create_image(
     703.5, 290.5,
-    image = URL_entry_img)
+    image=URL_entry_img)
 
 URL_entry = Entry(
-    bd = 0,
-    bg = "#ffffff",
-    highlightthickness = 0)
+    bd=0,
+    bg="#ffffff",
+    highlightthickness=0)
 
 URL_entry.place(
-    x = 569.5, y = 265,
-    width = 268.0,
-    height = 49)
+    x=592, y=277,
+    width=210.0,
+    height=30)
 
 
-path_entry_img = PhotoImage(file = f"img_textBox2.png")
 path_entry_bg = canvas.create_image(
     703.5, 393.5,
-    image = path_entry_img)
+    image=path_entry_img)
 
 path_entry = Entry(
-    bd = 0,
-    bg = "#ffffff",
-    highlightthickness = 0)
+    bd=0,
+    bg="#ffffff",
+    highlightthickness=0)
 
 path_entry.place(
-    x = 569.5, y = 368,
-    width = 268.0,
-    height = 49)
+    x=592, y=380,
+    width=210.0,
+    height=30)
 
 path_entry.bind("<1>", select_path)
 
 
-
-
-
-img0 = PhotoImage(file = f"img0.png")
-b0 = Button(
-    image = img0,
-    borderwidth = 0,
-    highlightthickness = 0,
-    command = btn_clicked,
-    relief = "flat")
+b0 = Button(bg=light_theme_color,
+            activebackground=light_theme_color,
+            image=create_button_light,
+            borderwidth=0,
+            highlightthickness=0,
+            command=btn_clicked,
+            relief="flat")
 
 b0.place(
-    x = 642, y = 471,
-    width = 123,
-    height = 49)
+    x=650, y=440,
+    width=104,
+    height=35)
+
+
+b1 = Button(bg=light_theme_color,
+            activebackground=light_theme_color,
+            image=sun,
+            borderwidth=0,
+            highlightthickness=0,
+            command=theme_change,
+            relief="flat")
+
+b1.place(
+    x=760, y=440,
+    width=35,
+    height=35)
+
 
 window.resizable(False, False)
 window.mainloop()
