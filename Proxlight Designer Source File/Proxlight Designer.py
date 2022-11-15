@@ -4,14 +4,11 @@
 import os
 import sys
 from tkinter import (
-    BOTH,
     END,
     Button,
     Canvas,
     Entry,
     Event,
-    Frame,
-    Label,
     PhotoImage,
     Tk,
     filedialog,
@@ -391,25 +388,13 @@ def select_path(event: Event) -> None:
     output_path = filedialog.askdirectory()
     path_entry.delete(0, END)
     path_entry.insert(0, output_path)
-    # window.deiconify()
-
-
-def make_label(master, x, y, h, w, *args, **kwargs):
-    f = Frame(master, height=h, width=w)
-    f.pack_propagate(0)  # don't shrink
-    f.place(x=x, y=y)
-
-    label = Label(f, *args, **kwargs)
-    label.pack(fill=BOTH, expand=1)
-
-    return label
 
 
 ##################################################################
 
 window = Tk()
 window.title("Proxlight Designer")
-# window.iconbitmap("logo.ico")
+window.iconbitmap("logo.ico")
 window.geometry("975x585")
 window.configure(bg="#FFFFFF")
 canvas = Canvas(
