@@ -3,41 +3,63 @@
 
 import os
 import sys
-from tkinter import (BOTH, END, Button, Canvas, Entry, Frame, Label,
-                     PhotoImage, Tk, filedialog, messagebox)
+from tkinter import (
+    END,
+    Button,
+    Canvas,
+    Entry,
+    Event,
+    PhotoImage,
+    Tk,
+    filedialog,
+    messagebox,
+)
+from typing import Dict, Tuple
 
 import requests
 
-############################################################################
+
+def get_color(element: Dict) -> str:
+    # Return HEX form of element RGB color (str)
+    return "#%02x%02x%02x" % (
+        round(element["fills"][0]["color"]["r"] * 255),
+        round(element["fills"][0]["color"]["g"] * 255),
+        round(element["fills"][0]["color"]["b"] * 255),
+    )
 
 
+def get_coordinates(element: Dict) -> Tuple[float, float]:
+    # Return element coordinates as x (float) and y (float)
+    return float(element["absoluteBoundingBox"]["x"]), float(
+        element["absoluteBoundingBox"]["y"]
+    )
 
-def generate_code(token, link, output_path):
-    def get_color(element):
-        # Return HEX form of element RGB color (str)
-        return "#%02x%02x%02x" % (
-            round(element["fills"][0]["color"]["r"] * 255),
-            round(element["fills"][0]["color"]["g"] * 255),
-            round(element["fills"][0]["color"]["b"] * 255),
-        )
 
-    def get_coordinates(element):
-        # Return element coordinates as x (int) and y (int)
-        return int(element["absoluteBoundingBox"]["x"]), int(
-            element["absoluteBoundingBox"]["y"]
-        )
+def get_dimensions(element: Dict) -> Tuple[int, int]:
+    # Return element dimensions as width (int) and height (int)
+    return int(element["absoluteBoundingBox"]["width"]), int(
+        element["absoluteBoundingBox"]["height"]
+    )
 
-    def get_dimensions(element):
-        # Return element dimensions as width (int) and height (int)
-        return int(element["absoluteBoundingBox"]["width"]), int(
-            element["absoluteBoundingBox"]["height"]
-        )
 
-    def get_text_properties(element):
-        # Return element font and fontSize (str)
-        return element["style"]["fontPostScriptName"], element["style"]["fontSize"]
+def get_text_properties(element: Dict) -> Tuple[str, int]:
+    # Return element font and fontSize (str)
+    return element["style"]["fontPostScriptName"], element["style"]["fontSize"]
 
-    global fig_window, response
+
+# Getting File Data
+def find_between(s: str, first: str, last: str) -> str:
+    try:
+        start = s.index(first) + len(first)
+        end = s.index(last, start)
+
+        return s[start:end]
+
+    except ValueError:
+        return ""
+
+
+def generate_code(token: str, link: str, output_path: str) -> None:
 
     generated_dir = output_path + "/Proxlight_Designer_Export/"
 
@@ -45,21 +67,11 @@ def generate_code(token, link, output_path):
     lines.extend(
         [
             "from tkinter import *\n\n",
-            "def btn_clicked():",
-            '    print("Button Clicked")\n\n\n' "window = Tk()",
+            "def btn_clicked() -> None:",
+            '    print("Button Clicked")\n\n',
+            "window = Tk()",
         ]
     )
-
-    # Getting File Data
-    def find_between(s, first, last):
-        try:
-            start = s.index(first) + len(first)
-            end = s.index(last, start)
-
-            return s[start:end]
-
-        except ValueError:
-            return ""
 
     token = token.strip()
     file_url = link.strip()
@@ -123,16 +135,16 @@ def generate_code(token, link, output_path):
     lines.extend(
         [
             f'\nwindow.geometry("{window_width}x{window_height}")',
-            f'window.configure(bg = "{window_bg_hex}")',
+            f'window.configure(bg="{window_bg_hex}")',
             "canvas = Canvas(",
             "    window,",
-            f'    bg = "{window_bg_hex}",',
-            f"    height = {window_height},",
-            f"    width = {window_width},",
-            "    bd = 0,",
-            "    highlightthickness = 0,",
-            '    relief = "ridge")',
-            "canvas.place(x = 0, y = 0)\n",
+            f'    bg="{window_bg_hex}",',
+            f"    height={window_height},",
+            f"    width={window_width},",
+            "    bd=0,",
+            "    highlightthickness=0,",
+            '    relief="ridge")',
+            "canvas.place(x=0, y=0)\n",
         ]
     )
 
@@ -143,23 +155,22 @@ def generate_code(token, link, output_path):
 
     for element in window_elements:
 
+        width, height = get_dimensions(element)
+        x, y = get_coordinates(element)
+
         if element["name"].lower() == "rectangle":
-            width, height = get_dimensions(element)
-            x, y = get_coordinates(element)
             element_color = get_color(element)
 
             lines.extend(
                 [
                     "\ncanvas.create_rectangle(",
                     f"    {x}, {y}, {x}+{width}, {y}+{height},",
-                    f'    fill = "{element_color}",',
-                    '    outline = "")\n',
+                    f'    fill="{element_color}",',
+                    '    outline="")\n',
                 ]
             )
 
         elif element["name"].lower() == "button":
-            width, height = get_dimensions(element)
-            x, y = get_coordinates(element)
             item_id = element["id"]
 
             try:
@@ -182,17 +193,17 @@ def generate_code(token, link, output_path):
 
             lines.extend(
                 [
-                    f'img{btn_count} = PhotoImage(file = f"img{btn_count}.png")',
+                    f'img{btn_count} = PhotoImage(file="img{btn_count}.png")',
                     f"b{btn_count} = Button(",
-                    f"    image = img{btn_count},",
-                    "    borderwidth = 0,",
-                    "    highlightthickness = 0,",
-                    "    command = btn_clicked,",
-                    '    relief = "flat")\n',
+                    f"    image=img{btn_count},",
+                    "    borderwidth=0,",
+                    "    highlightthickness=0,",
+                    "    command=btn_clicked,",
+                    '    relief="flat")\n',
                     f"b{btn_count}.place(",
-                    f"    x = {x}, y = {y},",
-                    f"    width = {width},",
-                    f"    height = {height})\n",
+                    f"    x={x}, y={y},",
+                    f"    width={width},",
+                    f"    height={height})\n",
                 ]
             )
 
@@ -200,33 +211,25 @@ def generate_code(token, link, output_path):
 
         elif element["type"] == "TEXT":
             text = element["characters"]
-            x, y = get_coordinates(element)
-            width, height = get_dimensions(element)
             color = get_color(element)
             font, fontSize = get_text_properties(element)
-
             x, y = x + (width / 2), y + (height / 2)
-
             text = text.replace("\n", "\\n")
 
             lines.extend(
                 [
-                    f"canvas.create_text(",
+                    "canvas.create_text(",
                     f"    {x}, {y},",
-                    f'    text = "{text}",',
-                    f'    fill = "{color}",',
-                    f'    font = ("{font}", int({fontSize})))\n',
+                    f'    text="{text}",',
+                    f'    fill="{color}",',
+                    f'    font=("{font}", int({fontSize})))\n',
                 ]
             )
 
         elif element["name"] in ("TextBox", "TextArea"):
             element_types = {"TextArea": "Text", "TextBox": "Entry"}
-
-            width, height = get_dimensions(element)
-            x, y = get_coordinates(element)
             x, y = x + (width / 2), y + (height / 2)
             bg = get_color(element)
-
             item_id = element["id"]
 
             try:
@@ -250,11 +253,11 @@ def generate_code(token, link, output_path):
 
             lines.extend(
                 [
-                    f"entry{text_entry_count}_img = PhotoImage("
-                    f'file = f"img_textBox{text_entry_count}.png")',
-                    f"entry{text_entry_count}_bg = " "canvas.create_image(",
+                    f"entry{text_entry_count}_img = PhotoImage(",
+                    f'    file="img_textBox{text_entry_count}.png")',
+                    f"entry{text_entry_count}_bg = canvas.create_image(",
                     f"    {x}, {y},",
-                    f"    image = entry{text_entry_count}_img)\n",
+                    f"    image=entry{text_entry_count}_img)\n",
                 ]
             )
 
@@ -276,21 +279,19 @@ def generate_code(token, link, output_path):
             lines.extend(
                 [
                     f"entry{text_entry_count} = " f'{element_types[element["name"]]}(',
-                    "    bd = 0,",
-                    f'    bg = "{bg}",',
-                    "    highlightthickness = 0)\n",
+                    "    bd=0,",
+                    f'    bg="{bg}",',
+                    "    highlightthickness=0)\n",
                     f"entry{text_entry_count}.place(",
-                    f"    x = {x}, y = {y},",
-                    f"    width = {reduced_width},",
-                    f"    height = {reduced_height})\n",
+                    f"    x={x}, y={y},",
+                    f"    width={reduced_width},",
+                    f"    height={reduced_height})\n",
                 ]
             )
 
             text_entry_count += 1
 
-        elif element["name"].lower() in ["background", "bg"]:
-            width, height = get_dimensions(element)
-            x, y = get_coordinates(element)
+        elif element["name"].lower() in ("background", "bg"):
             x, y = x + (width / 2), y + (height / 2)
             item_id = element["id"]
 
@@ -315,10 +316,10 @@ def generate_code(token, link, output_path):
 
             lines.extend(
                 [
-                    "background_img = PhotoImage(" 'file = f"background.png")',
+                    'background_img = PhotoImage(file="background.png")',
                     "background = canvas.create_image(",
                     f"    {x}, {y},",
-                    f"    image=background_img)\n",
+                    "    image=background_img)\n",
                 ]
             )
 
@@ -329,7 +330,7 @@ def generate_code(token, link, output_path):
     with open(f"{generated_dir}window.py", "w", encoding="utf-8") as py_file:
         py_file.writelines(final_code)
 
-    messagebox.showinfo("Success", "Design Exported successfully!")
+    messagebox.showinfo("Success", "Design Exported Successfully!")
 
 
 ############################################################################
@@ -337,21 +338,14 @@ def generate_code(token, link, output_path):
 path = getattr(sys, "_MEIPASS", os.getcwd())
 os.chdir(path)
 
-INITIAL_THEME = "light"
-theme = "light"
+
+INITIAL_THEME, theme = "light", "dark"
 
 
-def theme_change():
-    if theme != INITIAL_THEME:
-        b1.config(image=moon, bg=dark_theme_color, activebackground=dark_theme_color)
-        b0.config(
-            image=create_button_dark,
-            bg=dark_theme_color,
-            activebackground=dark_theme_color,
-        )
-        canvas.create_image(474.5, 286.0, image=background_img_dark)
-
-    else:
+def theme_change() -> None:
+    global theme
+    if theme == INITIAL_THEME:
+        theme = "dark"
         b1.config(image=sun, bg=light_theme_color, activebackground=light_theme_color)
         b0.config(
             image=create_button_light,
@@ -360,50 +354,47 @@ def theme_change():
         )
         canvas.create_image(474.5, 286.0, image=background_img_light)
 
+    else:
+        theme = "light"
+        b1.config(image=moon, bg=dark_theme_color, activebackground=dark_theme_color)
+        b0.config(
+            image=create_button_dark,
+            bg=dark_theme_color,
+            activebackground=dark_theme_color,
+        )
+        canvas.create_image(474.5, 286.0, image=background_img_dark)
 
-def btn_clicked():
+
+def btn_clicked() -> None:
     token = token_entry.get()
     URL = URL_entry.get()
 
     if not token:
-        messagebox.showerror(title="Empty Fields", message="Please enter Token")
+        messagebox.showerror("Empty Fields", "Please, enter a Token")
 
     elif not URL:
-        messagebox.showerror(title="Empty Fields", message="Please enter URL")
+        messagebox.showerror("Empty Fields", "Please, enter an URL")
 
-    elif not output_path:
-        messagebox.showerror(title="invalid path", message="Enter a valid output path")
+    elif output_path == "":
+        messagebox.showerror("Invalid Path", "Enter a valid output path")
 
     else:
         generate_code(token, URL, output_path)
 
 
-def select_path(event):
+def select_path(event: Event) -> None:
     global output_path
 
-    # window.withdraw()
     output_path = filedialog.askdirectory()
     path_entry.delete(0, END)
     path_entry.insert(0, output_path)
-    # window.deiconify()
-
-
-def make_label(master, x, y, h, w, *args, **kwargs):
-    f = Frame(master, height=h, width=w)
-    f.pack_propagate(0)  # don't shrink
-    f.place(x=x, y=y)
-
-    label = Label(f, *args, **kwargs)
-    label.pack(fill=BOTH, expand=1)
-
-    return label
 
 
 ##################################################################
 
 window = Tk()
 window.title("Proxlight Designer")
-# window.iconbitmap("logo.ico")
+window.iconbitmap("logo.ico")
 window.geometry("975x585")
 window.configure(bg="#FFFFFF")
 canvas = Canvas(
@@ -418,15 +409,15 @@ canvas = Canvas(
 canvas.place(x=0, y=0)
 
 
-background_img_light = PhotoImage(file=f"background_light.png")
-background_img_dark = PhotoImage(file=f"background_dark.png")
-token_entry_img = PhotoImage(file=f"img_textBox0.png")
-URL_entry_img = PhotoImage(file=f"img_textBox1.png")
-path_entry_img = PhotoImage(file=f"img_textBox2.png")
-create_button_light = PhotoImage(file=f"create_button_light.png")
-create_button_dark = PhotoImage(file=f"create_button_dark.png")
-sun = PhotoImage(file=f"sun.png")
-moon = PhotoImage(file=f"moon.png")
+background_img_light = PhotoImage(file="background_light.png")
+background_img_dark = PhotoImage(file="background_dark.png")
+token_entry_img = PhotoImage(file="img_textBox0.png")
+URL_entry_img = PhotoImage(file="img_textBox1.png")
+path_entry_img = PhotoImage(file="img_textBox2.png")
+create_button_light = PhotoImage(file="create_button_light.png")
+create_button_dark = PhotoImage(file="create_button_dark.png")
+sun = PhotoImage(file="sun.png")
+moon = PhotoImage(file="moon.png")
 light_theme_color = "#167A80"
 dark_theme_color = "#343636"
 
@@ -446,6 +437,8 @@ URL_entry = Entry(bd=0, bg="#ffffff", highlightthickness=0)
 
 URL_entry.place(x=592, y=277, width=210.0, height=30)
 
+
+output_path = ""
 
 path_entry_bg = canvas.create_image(703.5, 393.5, image=path_entry_img)
 

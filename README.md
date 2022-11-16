@@ -10,15 +10,15 @@
 
 ## 💡 Introduction
 
-Proxlight Designer was created to speed up the GUI-development process in Python. It uses the well-known design software [Figma](https://www.figma.com/) to make creating beautiful Tkinter GUIs in Python.
+Proxlight Designer was created to speed up the GUI-development process in Python. It uses the well-known design software [Figma](https://www.figma.com/) to make beautiful Tkinter GUIs in Python.
 
-Proxlight Designer uses the Figma API to analyse a design file and create the respective code and files needed for the GUI. Even Proxlight Designer's GUI is created using Proxlight Designer.
+Proxlight Designer uses the [Figma API](https://www.figma.com/developers/api) to analyse a design file and create the respective code and files needed for the GUI. Even Proxlight Designer's GUI is created using Proxlight Designer.
 
 ___
 
 ## ☄️  Advantages of Proxlight Designer
-1. Drag and Drop Interfaces
-2. Significantly faster than creating code manually.
+1. Drag and Drop Interfaces;
+2. Significantly faster than creating code manually;
 3. Ability to create more beautiful interfaces.
 
 ___
@@ -35,7 +35,7 @@ ___
 <!--- If you're not sure which open license to use see https://choosealicense.com/--->
 
 Proxlight Designer is licensed under the BSD 3-Clause "New" or "Revised" License.  
-[View Here.](https://github.com/Proxlightv/Proxlight-Designer/blob/master/LICENSE)
+[View Here](https://github.com/Proxlight/Proxlight-Designer-v2/blob/main/LICENSE)
 
 | Permissions | Restrictions | Conditions
 | --- | --- | --- 
