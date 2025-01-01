@@ -76,7 +76,7 @@ def generate_code(token: str, link: str, output_path: str) -> None:
     token = token.strip()
     file_url = link.strip()
 
-    file_id = find_between(file_url, "file/", "/")
+    file_id = find_between(file_url, "design/", "/")
 
     try:
         response = requests.get(
@@ -84,6 +84,7 @@ def generate_code(token: str, link: str, output_path: str) -> None:
             headers={"X-FIGMA-TOKEN": token},
             timeout=10,
         )
+        
 
     except ValueError:
         messagebox.showerror(
